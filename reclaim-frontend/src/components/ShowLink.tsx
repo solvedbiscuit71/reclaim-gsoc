@@ -1,4 +1,5 @@
-import { Box, Progress, Spinner, Text } from "@chakra-ui/react";
+import { ExternalLinkIcon } from "@chakra-ui/icons";
+import { Box, Link, Progress, Spinner, Text } from "@chakra-ui/react";
 import { QRCodeSVG } from "qrcode.react"
 
 interface Props {
@@ -13,7 +14,7 @@ function ShowLink(props: Props) {
         </Box>
         <Box width={'max-content'}>
             <Text mt={'24px'} mb={'16px'} fontFamily={'Inter, sans-serif'} fontSize={'16px'} fontWeight={'semibold'} color={'whiteAlpha.900'} mr={'16px'}>
-                Scan the above QR Code to verify your work
+                Scan the above QR Code to generate proof using <Link href="https://docs.reclaimprotocol.org/installing-reclaim-wallet" target="_blank">Reclaim Wallet <ExternalLinkIcon mx='2px' /></Link>
             </Text>
             <Progress isIndeterminate size={'xs'} bgColor={'gray.700'} />
         </Box>

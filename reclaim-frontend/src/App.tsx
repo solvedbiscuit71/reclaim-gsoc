@@ -1,5 +1,6 @@
-import { Box, Button, Text } from "@chakra-ui/react"
-import { useState } from "react"
+import { Box, Button, CheckboxIcon, Text } from "@chakra-ui/react"
+import { CheckCircleIcon } from "@chakra-ui/icons"
+import { useEffect, useState } from "react"
 
 import SelectOrganiser from "./components/SelectOrganiser"
 import Hero from "./components/Hero"
@@ -21,20 +22,30 @@ function App() {
   const [showForm, setShowForm] = useState(false)
   const [selectOrganiser, setSelectOrganiser] = useState("")
   const [organiserSelected, setOrganiserSelected] = useState(false)
+  const [isVerified, setIsVerified] = useState(false)
 
   const handleSubmit = () => {
     setOrganiserSelected(true);
   }
 
+  /* TODO: get status from backend using setInterval() */
+  useEffect(() => {
+    if (organiserSelected) {
+      setTimeout(() => {
+        setIsVerified(true)
+      }, 5000)
+    }
+  }, [organiserSelected])
+
   return (
     <>
-      <Box position='relative' width='100vw' height='100vh' pl='52px' pt='52px'>
+      <Box position='relative' w='100vw' h='100vh' pl='52px' pt='52px' fontFamily={'Inter, sans-serif'}>
         <Hero/>
 
         {
           !organiserSelected ?
           !showForm ?
-          <Button onClick={_ => setShowForm(true)} fontFamily={'Inter, sans-serif'} fontWeight='medium' bgColor='hsl(214 82% 50%)' borderRadius='4px' color='whiteAlpha.900' px='32px' py='18px' _hover={{ bg: 'hsl(214 82% 48%)' }}>Show your contribution</Button>
+          <Button onClick={_ => setShowForm(true)}  fontWeight='medium' bgColor='hsl(214 82% 50%)' borderRadius='4px' color='whiteAlpha.900' px='32px' py='18px' _hover={{ bg: 'hsl(214 82% 48%)' }}>Show your contribution</Button>
           :
           <SelectOrganiser 
             listOfOrganiser={listOfOrganiser}
@@ -43,10 +54,15 @@ function App() {
             handleSubmit={handleSubmit}
           />
           :
+          !isVerified ?
           <ShowLink url={`https://github.com/${selectOrganiser}`}/>
+          :
+          <Text fontSize={'36px'} fontWeight={'bold'} color={'whiteAlpha.900'} >
+            <CheckCircleIcon w={'44px'} h={'44px'} color={'hsl(214 82% 48% )'} verticalAlign={'-8px'}  mr={'8px'} /> Verified
+          </Text>
         }
 
-        <Text fontFamily={'Inter, sans-serif'} fontWeight={'bold'} color='whiteAlpha.900' position='absolute' bottom='16px' right='16px' fontSize='12px'>Powered by ReClaim Protocol</Text>
+        <Text fontWeight={'bold'} color='whiteAlpha.900' position='absolute' bottom='16px' right='16px' fontSize='12px'>Powered by ReClaim Protocol</Text>
       </Box>
     </>
   )
