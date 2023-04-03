@@ -1,4 +1,4 @@
-import { Box, Button, CheckboxIcon, Text } from "@chakra-ui/react"
+import { Box, Button, CheckboxIcon, Text, list } from "@chakra-ui/react"
 import { CheckCircleIcon } from "@chakra-ui/icons"
 import { useEffect, useState } from "react"
 
@@ -6,17 +6,17 @@ import SelectOrganiser from "./components/SelectOrganiser"
 import Hero from "./components/Hero"
 import ShowLink from "./components/ShowLink"
 
-const listOfOrganiser = {
-  "AsyncAPI":  "asyncapi/spec",
-  "Conda": "conda/conda",
-  "FluxCD": "fluxcd/flux2",
-  "OQ Engine": "gem/oq-engine",
-  "Matplotlib": "matplotlib/matplotlib",
-  "MicroPython": "micropython/micropython",
-  "Numpy": "numpy/numpy",
-  "Wagtail": "wagtail/wagtail",
-  "WasmEdge": "WasmEdge/WasmEdge",
-}
+const listOfOrganiser = [ 
+  ["AsyncAPI",  "asyncapi/spec"],
+  ["Conda", "conda/conda"],
+  ["FluxCD", "fluxcd/flux2"],
+  ["OQ Engine", "gem/oq-engine"],
+  ["Matplotlib", "matplotlib/matplotlib"],
+  ["MicroPython", "micropython/micropython"],
+  ["Numpy", "numpy/numpy"],
+  ["Wagtail", "wagtail/wagtail"],
+  ["WasmEdge", "WasmEdge/WasmEdge"],
+]
 
 function App() {
   const [showForm, setShowForm] = useState(false)
@@ -25,7 +25,16 @@ function App() {
   const [isVerified, setIsVerified] = useState(false)
 
   const handleSubmit = () => {
+    if (selectOrganiser.length == 0) {
+      return
+    }
+
     setOrganiserSelected(true);
+  }
+
+  const getRepository = () => {
+    const selected = listOfOrganiser.filter(org => org[0] == selectOrganiser)[0]
+    return selected[1]
   }
 
   /* TODO: get status from backend using setInterval() */
@@ -55,7 +64,7 @@ function App() {
           />
           :
           !isVerified ?
-          <ShowLink url={`https://github.com/${selectOrganiser}`}/>
+          <ShowLink url={`https://github.com/${getRepository()}`}/>
           :
           <Text fontSize={'36px'} fontWeight={'bold'} color={'whiteAlpha.900'} >
             <CheckCircleIcon w={'44px'} h={'44px'} color={'hsl(214 82% 48% )'} verticalAlign={'-8px'}  mr={'8px'} /> Verified
