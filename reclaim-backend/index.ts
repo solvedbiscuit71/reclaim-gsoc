@@ -83,10 +83,9 @@ app.post(
             `
             )
         }
-        const claims = Object.keys(req.body)[0]
 
         const data = await Submission.findOne({callbackId: req.params.callbackId}).exec()
-        if (data) {
+        if (!data) {
             return res.status(404).send(
             `
             <html>
@@ -104,7 +103,7 @@ app.post(
 
         await Submission.updateOne({ callbackId: req.params.callbackId }, { $set: {
             status: 'Verified',
-            claims: claims
+            claims: JSON.stringify(req.body)
         }}).exec()
 
         return res.status(200).send(
