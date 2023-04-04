@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from "express";
 import { Reclaim, generateUuid } from "@reclaimprotocol/reclaim-sdk";
 
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 dotenv.config()
 
@@ -24,16 +25,29 @@ app.use(cors(corsOptions))
 const callbackUrl = process.env.CALLBACK_URL || 'http://localhost:3000'
 const reclaim = new Reclaim(callbackUrl + '/callback/')
 
-// Demo DB
-interface Schema {
-    repoName: string;
-    callbackId: string;
-    templateId: string;
-    claims: string | null;
-    status: "Pending" | "Verified";
-}
+// Setup MonogoDB
+mongoose.connect(process.env.MONGODB_URL || 'mongodb://127.0.0.1:27017/reclaim')
+    .then(() => console.log("Connected successfully to database"))
+    .catch((err) => console.log("ERR: " + err))
 
-let DB : Schema[] = []
+// Submission Schemas
+const SubmissionSchema = new mongoose.Schema({
+    repositoryName: String,
+    callbackId: String,
+    templateId: String,
+    claims: String,
+    status: String
+})
+
+const Submission = mongoose.model("submission", SubmissionSchema)
+
+// Organisation Schema
+const OrganisationSchema = new mongoose.Schema({
+    name: String,
+    repositoryName: String,
+})
+
+const Organisation = mongoose.model("organisation", OrganisationSchema)
 
 app.post(
     "/callback/:callbackId",
@@ -71,8 +85,8 @@ app.post(
         }
         const claims = Object.keys(req.body)[0]
 
-        const iloc = DB.findIndex((doc => doc.callbackId == req.params.callbackId))
-        if (iloc == -1) {
+        const data = await Submission.findOne({callbackId: req.params.callbackId}).exec()
+        if (data) {
             return res.status(404).send(
             `
             <html>
@@ -87,8 +101,11 @@ app.post(
             `
             )
         }
-        DB[iloc].status = "Verified"
-        DB[iloc].claims = claims
+
+        await Submission.updateOne({ callbackId: req.params.callbackId }, { $set: {
+            status: 'Verified',
+            claims: claims
+        }}).exec()
 
         return res.status(200).send(
             `
@@ -109,16 +126,15 @@ app.post(
 app.get(
     "/status/:callbackId",
     async (req: Request, res: Response): Promise<Response> => {
-        const data = DB.filter(doc => doc.callbackId == req.params.callbackId)
-        if (data.length == 0) {
-            return res.status(404).send({
-                message: "Invalid callbackId"
+        const data = await Submission.findOne({callbackId: req.params.callbackId}).exec()
+        if (data) {
+            return res.status(200).send({
+                status: data.status
             })
         }
 
-        const status = data[0].status
-        return res.status(200).send({
-            status
+        return res.status(404).send({
+            message: "callbackId not found"
         })
     }
 )
@@ -126,16 +142,14 @@ app.get(
 app.post(
     "/verify",
     async (req: Request, res: Response): Promise<Response> => {
-        const repoName = req.body.repo
+        const repo = req.body.repo
         const callbackId = 'repo-' + generateUuid()
 
         const template = (
             await reclaim.connect('Github-contributor', [
                 {
                     provider: 'github-contributor',
-                    params: {
-                        repo: repoName
-                    }
+                    params: { repo }
                 }
             ])
         ).generateTemplate(callbackId)
@@ -143,13 +157,14 @@ app.post(
         const url = template.url
         const templateId = template.id
 
-        DB.push({
+        const newSubmission = new Submission({
+            repositoryName: repo,
             templateId,
             callbackId,
-            repoName,
             claims: null,
-            status: 'Pending',
+            status: 'Pending'
         })
+        await newSubmission.save();
 
         return res.status(200).send({
             url,
@@ -161,20 +176,10 @@ app.post(
 app.get(
     "/organisers",
     async (req: Request, res: Response): Promise<Response> => {
-        return res.status(200).send({
-            organisers: [
-                ["AsyncAPI",  "asyncapi/spec"],
-                ["Biscuit", "solvedbiscuit71/fanatic"],
-                ["Conda", "conda/conda"],
-                ["FluxCD", "fluxcd/flux2"],
-                ["OQ Engine", "gem/oq-engine"],
-                ["Matplotlib", "matplotlib/matplotlib"],
-                ["MicroPython", "micropython/micropython"],
-                ["Numpy", "numpy/numpy"],
-                ["Wagtail", "wagtail/wagtail"],
-                ["WasmEdge", "WasmEdge/WasmEdge"],
-            ]
-        });
+        const query = await Organisation.find().exec()
+        const organisers = query.map(doc => [doc.name, doc.repositoryName])
+
+        return res.status(200).send({ organisers });
     }
 );
 
