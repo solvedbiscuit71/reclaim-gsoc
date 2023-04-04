@@ -17,7 +17,13 @@ function App() {
   const [url, setUrl] = useState("")
   const [callbackId, setCallbackId] = useState("")
 
-  /* Helper functions */
+  /* Helpers */
+  const getRepository = () => {
+    const currentOrgTuple = organisers.filter(organiser => organiser[0] == currentOrg)[0]
+    return currentOrgTuple[1]
+  }
+
+  /* Handlers */
   const handleClick = () => {
     if (organisers.length == 0) {
       return
@@ -33,30 +39,53 @@ function App() {
 
     const res = await fetch(BACKEND_URL + '/verify', {
       method: 'POST',
-      body: JSON.stringify({repo: getRepository()})
+      body: JSON.stringify({repo: getRepository()}),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8"
+      }
     })
     const jsonData = await res.json()
-    console.log(jsonData)
 
     setUrl(jsonData.url)
     setCallbackId(jsonData.callbackId)
     setIsSubmitted(true)
   }
 
-  const getRepository = () => {
-    const currentOrgTuple = organisers.filter(organiser => organiser[0] == currentOrg)[0]
-    return currentOrgTuple[1]
-  }
-
-  /* TODO: get status from backend using setInterval() */
   useEffect(() => {
     if (isSubmitted) {
-      setTimeout(() => {
-        setIsVerified(true)
-      }, 5000)
+      const interval = setInterval(async () => {
+        if (isVerified)
+          return
+
+        const res = await fetch(BACKEND_URL + '/status/' + callbackId)
+        const jsonData = await res.json()
+
+        if (jsonData.status == 'Verified')
+          setIsVerified(true)
+      }, 1000)
+
+      return () => clearInterval(interval)
+    }
+
+    return () => {}
+  }, [isSubmitted])
+
+  /* mimic the callback */
+  useEffect(() => {
+    if (isSubmitted) {
+      setTimeout(async () => {
+        await fetch(BACKEND_URL + '/callback/' + callbackId, {
+          method: 'POST',
+          body: JSON.stringify({claims: "I assure you it is vaild!"}),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        })
+      }, 7000)
     }
   }, [isSubmitted])
 
+  /* Load the list of organisers */
   useEffect(() => {
     (async () => {
       const res = await fetch(BACKEND_URL + '/organisers')
