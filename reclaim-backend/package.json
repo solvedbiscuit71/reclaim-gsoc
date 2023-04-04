@@ -2,9 +2,9 @@
   "name": "reclaim-backend",
   "version": "0.0.0",
   "scripts": {
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
     "build": "npx tsc",
-    "start": "npx tsc && node dist/index.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
+    "preview": "node dist/index.js"
   },
   "dependencies": {
     "@reclaimprotocol/reclaim-sdk": "^1.0.7",
