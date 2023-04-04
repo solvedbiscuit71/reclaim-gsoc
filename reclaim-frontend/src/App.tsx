@@ -6,7 +6,7 @@ import Form from "./components/Form"
 import Hero from "./components/Hero"
 import Loading from "./components/Loading"
 
-const BACKEND_URL = 'http://localhost:8080'
+const BACKEND_URL = 'http://localhost:3000'
 
 function App() {
   const [FormVisible, setFormVisible] = useState(false)
@@ -14,6 +14,8 @@ function App() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
   const [organisers, setOrganisers] = useState([])
+  const [url, setUrl] = useState("")
+  const [callbackId, setCallbackId] = useState("")
 
   /* Helper functions */
   const handleClick = () => {
@@ -24,10 +26,20 @@ function App() {
     setFormVisible(true)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!currentOrg) {
       return
     }
+
+    const res = await fetch(BACKEND_URL + '/verify', {
+      method: 'POST',
+      body: JSON.stringify({repo: getRepository()})
+    })
+    const jsonData = await res.json()
+    console.log(jsonData)
+
+    setUrl(jsonData.url)
+    setCallbackId(jsonData.callbackId)
     setIsSubmitted(true)
   }
 
@@ -74,7 +86,7 @@ function App() {
           />
           :
           !isVerified ?
-          <Loading url={`https://github.com/${getRepository()}`}/>
+          <Loading url={url}/>
           :
           <Text fontSize={'36px'} fontWeight={'bold'} color={'whiteAlpha.900'} >
             <CheckCircleIcon w={'44px'} h={'44px'} color={'hsl(214 82% 48% )'} verticalAlign={'-8px'}  mr={'8px'} /> Verified
