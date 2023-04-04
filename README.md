@@ -1,6 +1,6 @@
 # Reclaim in GSOC
 
-Reclaim in GSOC aims to provides a way to prove your contribution to the GSOC without explicitly giving Google the access to your Github. This is achieved using the Questbook's Reclaim protocal along with its companion mobile app [Reclaim wallet](https://docs.reclaimprotocol.org/installing-reclaim-wallet).
+Reclaim in GSOC aims to provides a way to prove your contribution to the GSOC without explicitly giving Google the access to your Github. This is achieved using the Questbook's [Reclaim protocal](https://www.reclaimprotocol.org/) along with its companion mobile app [Reclaim wallet](https://docs.reclaimprotocol.org/installing-reclaim-wallet).
 
 # Prerequisites
 
