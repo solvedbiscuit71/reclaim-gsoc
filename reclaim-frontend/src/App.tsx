@@ -70,21 +70,6 @@ function App() {
     return () => {}
   }, [isSubmitted])
 
-  /* mimic the callback */
-  useEffect(() => {
-    if (isSubmitted) {
-      setTimeout(async () => {
-        await fetch(BACKEND_URL + '/callback/' + callbackId, {
-          method: 'POST',
-          body: JSON.stringify({claims: "I assure you it is vaild!"}),
-          headers: {
-            "Content-type": "application/json; charset=UTF-8"
-          }
-        })
-      }, 7000)
-    }
-  }, [isSubmitted])
-
   /* Load the list of organisers */
   useEffect(() => {
     (async () => {

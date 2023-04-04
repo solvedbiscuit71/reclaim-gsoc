@@ -44,11 +44,12 @@ app.post(
             })
         }
 
-        if (!req.body.claims) {
+        if (Object.keys(req.body).length == 0) {
             return res.status(400).send({
                 message: "claims is required"
             })
         }
+        const claims = Object.keys(req.body)[0]
 
         const iloc = DB.findIndex((doc => doc.callbackId == req.params.callbackId))
         if (iloc == -1) {
@@ -57,7 +58,7 @@ app.post(
             })
         }
         DB[iloc].status = "Verified"
-        DB[iloc].claims = req.body.claims
+        DB[iloc].claims = claims
 
         return res.status(200).send({
             message: "Ok"
@@ -123,6 +124,7 @@ app.get(
         return res.status(200).send({
             organisers: [
                 ["AsyncAPI",  "asyncapi/spec"],
+                ["Biscuit", "solvedbiscuit71/fanatic"],
                 ["Conda", "conda/conda"],
                 ["FluxCD", "fluxcd/flux2"],
                 ["OQ Engine", "gem/oq-engine"],
