@@ -39,30 +39,70 @@ app.post(
     "/callback/:callbackId",
     async (req: Request, res: Response): Promise<Response> => {
         if (!req.params.callbackId) {
-            return res.status(400).send({
-                message: "callbackId is required"
-            })
+            return res.status(400).send(
+            `
+            <html>
+                <head>
+                    <title>Reclaim in GSOC</title>
+                </head>
+                <body>
+                    <h1>Status: 400 (Bad Access)</h1>
+                    <p>CallbackId is required</p>
+                </body>
+            </html>
+            `
+            )
         }
 
         if (Object.keys(req.body).length == 0) {
-            return res.status(400).send({
-                message: "claims is required"
-            })
+            return res.status(400).send(
+            `
+            <html>
+                <head>
+                    <title>Reclaim in GSOC</title>
+                </head>
+                <body>
+                    <h1>Status: 400 (Bad Access)</h1>
+                    <p>Claims is required</p>
+                </body>
+            </html>
+            `
+            )
         }
         const claims = Object.keys(req.body)[0]
 
         const iloc = DB.findIndex((doc => doc.callbackId == req.params.callbackId))
         if (iloc == -1) {
-            return res.status(404).send({
-                message: "Invalid callbackId"
-            })
+            return res.status(404).send(
+            `
+            <html>
+                <head>
+                    <title>Reclaim in GSOC</title>
+                </head>
+                <body>
+                    <h1>Status: 404 (Not Found)</h1>
+                    <p>Callback Id doesn't exists</p>
+                </body>
+            </html>
+            `
+            )
         }
         DB[iloc].status = "Verified"
         DB[iloc].claims = claims
 
-        return res.status(200).send({
-            message: "Ok"
-        })
+        return res.status(200).send(
+            `
+            <html>
+                <head>
+                    <title>Reclaim in GSOC</title>
+                </head>
+                <body>
+                    <h1>Status: 200 (OK)</h1>
+                    <p>Your claim has been accepted</p>
+                </body>
+            </html>
+            `
+        )
     }
 )
 
