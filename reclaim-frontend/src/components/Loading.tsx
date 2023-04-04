@@ -1,5 +1,5 @@
 import { ExternalLinkIcon } from "@chakra-ui/icons";
-import { Box, Link, Progress, Spinner, Text } from "@chakra-ui/react";
+import { Box, Link, Progress, Text } from "@chakra-ui/react";
 import { QRCodeSVG } from "qrcode.react"
 
 interface Props {
